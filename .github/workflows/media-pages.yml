@@ -1,0 +1,32 @@
+name: Publish media
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: media-pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment: github-pages
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/configure-pages@v5
+      - name: Collect published media
+        run: |
+          mkdir -p site/media
+          find media -maxdepth 1 -type f \( -name '*.jpg' -o -name '*.mp4' \) -exec cp -- {} site/media/ \;
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+      - uses: actions/deploy-pages@v4
+
